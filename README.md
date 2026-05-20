@@ -1,165 +1,175 @@
 # HireFlow
 
-HireFlow is a premium, production-grade recruitment job board and AI-driven candidate screening platform built on the modern MERN stack. It features robust authentication, fine-grained Role-Based Access Controls (RBAC), and automatic resume screening utilizing advanced natural language processing.
+A production-grade recruitment platform and AI-powered applicant screening system built on the MERN stack.
 
 ---
 
-## 🚀 Key Features
+## Features
 
-*   **Rotating Sessions & Security:** Full JSON Web Token (JWT) workflow featuring cookie-based Rotating Refresh Tokens, sliding session limits, and programmatic token reuse breach detection.
-*   **Role-Based Access Control (RBAC):** Strict operational boundaries for `applicant`, `employer`, and `admin` roles, secured via declarative API and route-level authorization guards.
-*   **Smart Candidate Screening:** Instant asynchronous candidate screening. Analyzes raw text parsed directly from PDF resume uploads against target job parameters using OpenAI `gpt-4o-mini`, with high-fidelity, skill-matching local offline fallbacks.
-*   **Aesthetic User Interface:** Premium responsive glassmorphic interfaces, Outfit/Inter typography hierarchies, soft mesh background styling, color-coded badges, dynamic timeline trackers, and a seamless light/dark mode switch.
-*   **Scalable Architecture:** Built following clean MVC + Service Layer patterns, keeping database interaction decoupled from client controllers. Fully virtualized using Docker Compose.
-
----
-
-## 🛠️ Technology Stack
-
-*   **Frontend:** React 18 (Vite), Zustand, Tailwind CSS, Lucide Icons, Axios (with rotating 401 interception retry loops).
-*   **Backend:** Node.js, Express, Winston Logger, Zod Schemas, Multer.
-*   **Database:** MongoDB 7, Mongoose (indexing, compound keys, and text indexes).
-*   **Storage:** Cloudinary API (with automatic local uploads fallback).
-*   **AI screener:** OpenAI API (with robust local skill-matching fallback).
-*   **Transactional Email:** Nodemailer (with Winston console output fallback).
-*   **Containerization:** Docker Compose (multi-container isolation: mongo, backend, frontend).
+- **Session Security:** JWT access tokens and HTTP-only rotating refresh tokens with automatic token reuse breach detection.
+- **Role-Based Access Control (RBAC):** Dedicated dashboards and route-level authorization guards for applicants, recruiters, and administrators.
+- **Asynchronous AI Screening:** Automated parsing of PDF resumes evaluated against job criteria via OpenAI `gpt-4o-mini`, with a local fallback algorithm.
+- **Vacancy Moderation & Search:** Dynamic job board supporting full-text search, salary ranges, location parameters, and remote tags.
+- **Analytics:** Employer dashboards with metrics for active postings, applicant counts, and score distributions.
 
 ---
 
-## 📂 Project Structure
+## Tech Stack
+
+- **Frontend:** React 18, Vite, Zustand, Tailwind CSS, Axios
+- **Backend:** Node.js, Express, Winston, Zod
+- **Database:** MongoDB 7, Mongoose ODM
+- **Services:** OpenAI API, Cloudinary API, Nodemailer
+- **Containerization:** Docker, Docker Compose
+
+---
+
+## Project Structure
 
 ```text
 HireFlow/
 ├── backend/
-│   ├── Dockerfile
-│   ├── package.json
-│   ├── server.js
 │   ├── src/
-│   │   ├── app.js
-│   │   ├── config/          # db, logger, cloudinary configuration
-│   │   ├── controllers/     # Express route handlers
-│   │   ├── middleware/      # auth, rbac, error, validation, limits
+│   │   ├── config/          # Client & db setups (mongo, winston, cloudinary)
+│   │   ├── controllers/     # Request handlers
+│   │   ├── middleware/      # Auth, RBAC, validations, rate limiters
 │   │   ├── models/          # Mongoose database models
-│   │   ├── routes/          # Express routing pathways
-│   │   ├── services/        # token, email, and AI logic layers
-│   │   ├── utils/           # standardized errors, response forms
+│   │   ├── routes/          # Express route paths
+│   │   ├── services/        # Logic handlers (Token lifecycle, Email, AI)
 │   │   └── validations/     # Zod request validators
-│   └── public/uploads/      # Local uploads fallback directory
+│   └── server.js            # Entry point
 ├── frontend/
-│   ├── Dockerfile
-│   ├── package.json
-│   ├── vite.config.js
-│   ├── tailwind.config.js
 │   ├── src/
-│   │   ├── App.jsx          # Routes definition and session checks
-│   │   ├── main.jsx
-│   │   ├── index.css        # Core styles & animations
-│   │   ├── api/             # Axios instance + 401 response retry loops
-│   │   ├── store/           # Zustand state managers (auth, theme)
-│   │   ├── components/      # Glassmorphic UI layout components
-│   │   └── pages/           # Candidate, Employer, and Admin portals
-└── docker-compose.yml       # Orchestration build file
+│   │   ├── api/             # Axios client with 401 retry loops
+│   │   ├── store/           # Zustand stores (Auth, Theme)
+│   │   ├── components/      # UI components
+│   │   └── pages/           # Candidate, recruiter, and admin portals
+│   └── vite.config.js
+└── docker-compose.yml
 ```
 
 ---
 
-## ⚙️ Configuration & Setup
+## Quick Start (Local Development)
 
-### Environment Variables
-Configure the environment variables by creating `.env` in the `backend/` directory or copying `.env.example` in the root. If external integrations are missing, HireFlow will automatically activate high-fidelity offline mock modes for frictionless evaluation.
+### Prerequisites
+- Node.js v20+
+- MongoDB instance running locally (or running in Docker)
 
-| Variable Name | Description | Default / Example Value |
-| :--- | :--- | :--- |
-| `NODE_ENV` | Running environment mode | `development` |
-| `PORT` | Backend application port | `5000` |
-| `MONGO_URI` | MongoDB Connection String | `mongodb://root:rootpassword@mongo:27017/jobboard?authSource=admin` |
-| `JWT_ACCESS_SECRET` | 32+ character JWT Access Secret | `change_me_in_production_min_32_characters` |
-| `JWT_REFRESH_SECRET` | 64+ character JWT Refresh Secret | `change_me_in_production_min_64_characters` |
-| `OPENAI_API_KEY` | OpenAI API integration key (Optional) | `sk-proj-...` *(Mocks automatically fallback if empty)* |
-| `CLOUDINARY_CLOUD_NAME` | Cloudinary Account ID (Optional) | `your_cloudinary_cloud_name` *(Mocks save files locally)* |
-| `SMTP_HOST` | Transactional email provider host (Optional)| `smtp.mailtrap.io` *(Mocks write emails to console)* |
-| `CLIENT_URL` | Frontend connection URL origin | `http://localhost:3000` |
+### Installation
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd HireFlow
+   ```
+2. **Setup backend environment:**
+   Create a `.env` file inside `backend/` (see **Environment Variables** below).
+   *Note: If MongoDB is running on your host, use `localhost` in the connection string:*
+   `MONGO_URI=mongodb://root:rootpassword@localhost:27017/jobboard?authSource=admin`
 
----
+3. **Start backend server:**
+   ```bash
+   cd backend
+   npm install
+   npm run dev
+   ```
+   Server starts on `http://localhost:5000`.
 
-## 🐳 Docker Deployment
-
-To launch the full environment out-of-the-box in detached mode, run:
-
-```bash
-docker compose up --build -d
-```
-
-This starts three isolated containers:
-1.  **job-board-mongo** at `mongodb://localhost:27017`
-2.  **job-board-backend** at `http://localhost:5000`
-3.  **job-board-frontend** at `http://localhost:3000`
-
-### Additional Container Controls
-
-*   **View active containers:** `docker ps`
-*   **Stream application logs:** `docker logs -f job-board-backend`
-*   **Shut down application services:** `docker compose down`
+4. **Start frontend dev server:**
+   Open a new terminal window:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+   Vite dev server starts on `http://localhost:3000`.
 
 ---
 
-## 🛡️ API Roadmap
+## Docker Setup
 
-### Auth Routes (`/api/auth`)
-*   `POST /register` - Register a new candidate or recruiter
-*   `POST /login` - Sign-in & receive access token + refresh cookie
-*   `POST /logout` - Wipe active session & revoke refresh keys
-*   `POST /refresh` - Perform rotating silent refresh token exchange
+Deploy the entire stack with isolated multi-container virtualization:
 
-### Jobs Routes (`/api/jobs`)
-*   `GET /` - Dynamic search feed with paginated filtering options
-*   `POST /` - Create a new vacancy *(Recruiter only)*
-*   `GET /:id` - View full details of a specific job
-*   `PUT /:id` - Modify an existing vacancy *(Job owner/Admin)*
-*   `DELETE /:id` - Soft-delete a active vacancy *(Job owner/Admin)*
-
-### Applications Routes (`/api/applications`)
-*   `POST /` - Submit application (includes direct resume attachment stream) *(Applicant only)*
-*   `GET /my` - List candidates personal applications history *(Applicant only)*
-*   `GET /job/:jobId` - Rank and list applicants sorted by AI match scores *(Recruiter/Admin)*
-*   `PATCH /:id/status` - Transition candidate status & issue email notifications *(Recruiter/Admin)*
-
-### Admin Routes (`/api/admin`)
-*   `GET /stats` - Access system health charts and platform growth stats
-*   `GET /users` - Paginated user management dashboard
-*   `PATCH /users/:id/status` - Suspend/unsuspend user account access
-*   `GET /jobs` - Paginated global moderation list of all active vacancies
+1. **Verify Docker is running.**
+2. **Build and launch services:**
+   ```bash
+   docker compose up --build -d
+   ```
+   This automatically runs MongoDB (`job-board-mongo`), the Express API (`job-board-backend`), and the React SPA (`job-board-frontend`). The app will be live at `http://localhost:3000`.
 
 ---
 
-## 🧪 Integration Verification
+## Environment Variables
 
-Verify system availability using the built-in Mongoose database health endpoint:
+Configure a `.env` file in the `backend/` directory:
 
-```bash
-# In PowerShell:
-Invoke-RestMethod -Uri http://localhost:5000/api/health | ConvertTo-Json
-```
+```env
+# Server Config
+NODE_ENV=development
+PORT=5000
+CLIENT_URL=http://localhost:3000
 
-Successful response layout:
-```json
-{
-  "success": true,
-  "message": "System is healthy.",
-  "data": {
-    "status": "ok",
-    "db": "connected",
-    "uptime": 120.4,
-    "timestamp": "2026-05-20T11:05:00.000Z"
-  }
-}
+# Database
+MONGO_URI=mongodb://root:rootpassword@mongo:27017/jobboard?authSource=admin
+
+# Security (Secrets should be min 32/64 characters)
+JWT_ACCESS_SECRET=your_32_char_access_secret
+JWT_ACCESS_EXPIRES_IN=15m
+JWT_REFRESH_SECRET=your_64_char_refresh_secret
+JWT_REFRESH_EXPIRES_IN=7d
+
+# Third-Party APIs (Optional fallbacks apply if left blank)
+OPENAI_API_KEY=sk-proj-yourOpenAiApiKey
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+# Notifications
+SMTP_HOST=smtp.mailtrap.io
+SMTP_PORT=2525
+SMTP_USER=your_smtp_user
+SMTP_PASS=your_smtp_password
+EMAIL_FROM=noreply@hireflow.com
 ```
 
 ---
 
-## 🎨 Design Systems & UI Colors
+## API Summary
 
-*   **Light Mode:** Premium `slate-50` backdrop with dynamic glass cards (`white/80` backdrop-blur).
-*   **Dark Mode:** harmonious tailored HSL tones (`bg-darkbg-200` with subtle glassmorphic elevation gradients).
-*   **Brand Highlights:** Sleek blue-indigo accents (`brand-500` to `brand-600` gradients) for buttons and active headers.
-*   **Status Indicators:** Color-coded status markers (`status-badge-pending`, `status-badge-shortlisted`, `status-badge-rejected`, `status-badge-reviewed`) providing clear visual states.
+| Method | Endpoint | Access Guard | Description |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/api/auth/register` | Public | Register candidate or employer account |
+| **POST** | `/api/auth/login` | Public | Create user session and issue refresh cookies |
+| **POST** | `/api/auth/logout` | Protected | Terminate session and clear credentials |
+| **POST** | `/api/auth/refresh` | Protected | Exchange expired access token using refresh cookie |
+| **GET** | `/api/jobs` | Public | Paginated job search feed with filters |
+| **POST** | `/api/jobs` | Recruiter | Publish a new job vacancy |
+| **PUT** | `/api/jobs/:id` | Owner / Admin | Modify an existing job listing |
+| **DELETE**| `/api/jobs/:id` | Owner / Admin | Soft-delete a job listing |
+| **POST** | `/api/applications` | Applicant | Submit resume & cover letter to a job |
+| **GET** | `/api/applications/my`| Applicant | Get submission history for the applicant |
+| **GET** | `/api/applications/job/:jobId` | Recruiter | Get job applications sorted by AI fit scores |
+| **PATCH** | `/api/applications/:id/status`| Recruiter | Transition application status and notify applicant |
+| **GET** | `/api/admin/stats` | Admin | Access platform metrics and system state |
+| **PATCH** | `/api/admin/users/:id/status`| Admin | Suspend or unsuspend user accounts |
+
+---
+
+## Authentication & RBAC
+
+Secure route access is maintained via Express middlewares implementing strict boundary guards:
+
+- **Dual-Token Scheme:** API access requires a short-lived bearer JWT. Silent session renewal is handled via cryptographically secure, rotating HTTP-only cookies.
+- **Replay Protection:** If an already-used refresh token is presented, the system detects a breach and instantly revokes all active refresh tokens for that user.
+- **Roles:**
+  - `applicant`: Can view jobs, manage their profile, upload a PDF resume, and submit/track applications.
+  - `employer`: Can create job posts, view candidates sorted by AI-match scoring, update application statuses, and view metrics.
+  - `admin`: Has system-wide visibility, can moderate job listings, and suspend users.
+
+---
+
+## Deployment Notes
+
+- **Reverse Proxy:** Route requests through Nginx to map `/api` to the backend Express container while serving frontend build outputs as static files.
+- **Security Headers:** Ensure standard HTTP protection using Helmet. Set cookie configurations to `Secure` in production environments.
+- **Clustering:** Scale backend services using isolated stateless nodes and transition MongoDB to clustered Replica Sets.
