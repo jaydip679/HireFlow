@@ -23,7 +23,6 @@ const UserSchema = new mongoose.Schema(
       type:     String,
       required: true,
       select:   false,    // NEVER returned in queries by default
-      minlength: 60,      // bcrypt output is always 60 chars
     },
 
     role: {
@@ -74,7 +73,7 @@ const UserSchema = new mongoose.Schema(
     // Account state
     isVerified: {
       type:    Boolean,
-      default: false,
+      default: true,
     },
 
     isSuspended: {
