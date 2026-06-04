@@ -19,27 +19,18 @@ export const register = catchAsync(async (req, res, next) => {
     throw new ApiError(409, 'Email already registered. Please login.', 'EMAIL_ALREADY_REGISTERED');
   }
 
-  // Create cryptographically secure email verification tokens
-  const rawVerificationToken = crypto.randomBytes(32).toString('hex');
-  const hashedVerificationToken = crypto.createHash('sha256').update(rawVerificationToken).digest('hex');
-  const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
   const newUser = await User.create({
     name,
     email,
     passwordHash: password, // Hashed automatically in Mongoose pre-save
     role,
-    verificationToken: hashedVerificationToken,
-    verificationTokenExpires,
+    isVerified: true, // Auto-verified
   });
-
-  // Send transactional verification email (asynchronous, doesn't block response)
-  sendVerificationEmail(newUser, rawVerificationToken);
 
   return res.status(201).json(
     apiResponse.success(
       newUser.toSafeObject(),
-      'Registration successful! Please check your email to verify your account.'
+      'Registration successful! You can now log in.'
     )
   );
 });
@@ -88,10 +79,10 @@ export const login = catchAsync(async (req, res, next) => {
     throw new ApiError(401, 'Invalid email or password.', 'INVALID_CREDENTIALS');
   }
 
-  // PRD Case 9: Block unverified logins
-  if (!user.isVerified) {
-    throw new ApiError(403, 'Please verify your email address before logging in.', 'EMAIL_UNVERIFIED');
-  }
+  // Email verification bypass: all users can log in immediately
+  // if (!user.isVerified) {
+  //   throw new ApiError(403, 'Please verify your email address before logging in.', 'EMAIL_UNVERIFIED');
+  // }
 
   // Block suspended logins
   if (user.isSuspended) {
